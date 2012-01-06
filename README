@@ -1,0 +1,25 @@
+This is a simple tool to check if XBMC addon strings.xml files of different
+languages are in sync.
+
+
+For example, if you have these to language files:
+
+$ cat English/strings.xml 
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <string id="1">Foo</string>
+    <string id="2">Bar</string>
+</strings>
+$ cat Backwardslanguage/strings.xml 
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <string id="1">Foo</string>
+</strings>
+
+Running the tool will give you:
+
+$ ./translationtool.py English/strings.xml Backwardslanguage/strings.xml
+Parsing: English/strings.xml
+Parsing: Backwardslanguage/strings.xml
+id 2 missing in Backwardslanguage/strings.xml
+
