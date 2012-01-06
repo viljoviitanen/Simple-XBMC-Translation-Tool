@@ -1,8 +1,11 @@
 This is a simple tool to check if XBMC addon strings.xml files of different
 languages are in sync.
 
+It parses all the files given as arguments, loops through the files and stores
+all ids it finds, then loops through the ids and checks if all files have
+all the ids. Any number of files can be compared.
 
-For example, if you have these to language files:
+For example, if you have these two language files:
 
 $ cat English/strings.xml 
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
