@@ -30,20 +30,20 @@ for i in range(len(myargs)):
   doms.append(minidom.parse(myargs[i]))
 
 #get all ids from all files
-ids=dict()
+allids=dict()
+ids=[]
 
-for d in doms:
-  for s in d.getElementsByTagName('string'):
-    ids[s.attributes['id'].value]=''
+#store all ids in one dictionary and ids per file in separate dictionaries
+for i in range(len(myargs)):
+  ids.append(dict());
+  for s in doms[i].getElementsByTagName('string'):
+    allids[s.attributes['id'].value]=''
+    ids[i][s.attributes['id'].value]=''
 
 #loop all mentioned string ids, see if all the files have them
-#not very efficient but I DONT CARE. Fix it if you care enough about this
-for id in ids.keys():
+for id in allids.keys():
   for i in range(len(myargs)):
-    myids=[]
-    for s in doms[i].getElementsByTagName('string'):
-      myids.append(s.attributes['id'].value)
-    if id not in myids:
+    if id not in ids[i].keys():
       print "id %s missing in %s"%(id,myargs[i])
 
 
