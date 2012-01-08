@@ -30,9 +30,11 @@ def getText(nodelist):
 
 #first, parse the base file. store ids and text values in a dictionary for fast access later
 print "Using base: "+sys.argv[1]
+allids=dict()
 baseids=dict()
 for s in minidom.parse(sys.argv[1]).getElementsByTagName('string'):
   baseids[s.attributes['id'].value]=getText(s.childNodes)
+  allids[s.attributes['id'].value]=''
   #print "base: %s %s"%(s.attributes['id'].value.encode("utf-8"),getText(s.childNodes).encode("utf-8"))
 
 #get only the the command line agruments 2-n
@@ -46,7 +48,6 @@ for i in range(len(myargs)):
 
 #get all ids from all files
 ids=[]
-allids=dict()
 #store all ids in one dictionary and ids per file in separate dictionaries
 for i in range(len(myargs)):
   ids.append(dict());
@@ -57,11 +58,11 @@ for i in range(len(myargs)):
 #loop all files, see if all ids are found
 for i in range(len(myargs)):
   print myargs[i]
-  for id in allids.keys():
+  for id in sorted(allids.keys()):
     if id not in ids[i].keys():
       if id in baseids.keys():
         print """  <string id="%s">%s</string>"""%(id.encode("utf-8"),baseids[id].encode("utf-8"))
-      else:
-        print "  %s not in base file!"%id.encode("utf-8")
+    elif (id in ids[i].keys()) and (id not in baseids.keys()):
+        print """  not in base:%s"""%(id.encode("utf-8"))
 
 
