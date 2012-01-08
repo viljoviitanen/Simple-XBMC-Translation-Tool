@@ -17,12 +17,14 @@ $ cat Backwardslanguage/strings.xml
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <strings>
     <string id="1">Foo</string>
+    <string id="3">Baz</string>
 </strings>
 
 Running the tool will give you:
 
-$ ./translationtool.py English/strings.xml Backwardslanguage/strings.xml
-Parsing: English/strings.xml
-Parsing: Backwardslanguage/strings.xml
-id 2 missing in Backwardslanguage/strings.xml
+$ translationtool.py English/strings.xml Backwardslanguage/strings.xml 
+Using base: English/strings.xml
+Backwardslanguage/strings.xml
+  <string id="2">Bar</string>
+  not in base:3
 
