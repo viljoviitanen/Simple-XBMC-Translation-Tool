@@ -17,22 +17,36 @@
 
 from xml.dom import minidom
 
-import sys
+import sys,copy
 
-myargs=sys.argv
+#from python reference manual
+def getText(nodelist):
+    rc = ""
+    for node in nodelist:
+        if node.nodeType == node.TEXT_NODE:
+            rc = rc + node.data
+    return rc
 
-#get only the the command line agruments
-myargs[0:1]=[]
+
+#first, parse the base file. store ids and text values in a dictionary for fast access later
+print "Using base: "+sys.argv[1]
+baseids=dict()
+for s in minidom.parse(sys.argv[1]).getElementsByTagName('string'):
+  baseids[s.attributes['id'].value]=getText(s.childNodes)
+  #print "base: %s %s"%(s.attributes['id'].value.encode("utf-8"),getText(s.childNodes).encode("utf-8"))
+
+#get only the the command line agruments 2-n
+myargs=copy.deepcopy(sys.argv)
+myargs[0:2]=[]
 
 doms=[]
 for i in range(len(myargs)):
-  print "Parsing: " + myargs[i]
+  #print "Parsing: " + myargs[i]
   doms.append(minidom.parse(myargs[i]))
 
 #get all ids from all files
-allids=dict()
 ids=[]
-
+allids=dict()
 #store all ids in one dictionary and ids per file in separate dictionaries
 for i in range(len(myargs)):
   ids.append(dict());
@@ -40,10 +54,14 @@ for i in range(len(myargs)):
     allids[s.attributes['id'].value]=''
     ids[i][s.attributes['id'].value]=''
 
-#loop all mentioned string ids, see if all the files have them
-for id in allids.keys():
-  for i in range(len(myargs)):
+#loop all files, see if all ids are found
+for i in range(len(myargs)):
+  print myargs[i]
+  for id in allids.keys():
     if id not in ids[i].keys():
-      print "id %s missing in %s"%(id,myargs[i])
+      if id in baseids.keys():
+        print """  <string id="%s">%s</string>"""%(id.encode("utf-8"),baseids[id].encode("utf-8"))
+      else:
+        print "  %s not in base file!"%id.encode("utf-8")
 
 
