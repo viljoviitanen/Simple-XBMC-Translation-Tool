@@ -15,6 +15,9 @@
 #along with this program; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+#generates an xliff file for transifex import
+#usage: first parameter: English/strings.xml second parameter: Otherlanguage/strings.xml
+
 from xml.dom import minidom
 
 import sys,copy
@@ -27,55 +30,34 @@ def getText(nodelist):
             rc = rc + node.data
     return rc
 
-
 #first, parse the base file. store ids and text values in a dictionary for fast access later
-#print "Using base: "+sys.argv[1]
-allids=dict()
 baseids=dict()
 for s in minidom.parse(sys.argv[1]).getElementsByTagName('string'):
   baseids[s.attributes['id'].value]=getText(s.childNodes)
-  allids[s.attributes['id'].value]=''
-  #print "base: %s %s"%(s.attributes['id'].value.encode("utf-8"),getText(s.childNodes).encode("utf-8"))
 
-#get only the the command line agruments 2-n
-myargs=copy.deepcopy(sys.argv)
-myargs[0:2]=[]
+#then the other file
+ids=dict();
+for s in minidom.parse(sys.argv[2]).getElementsByTagName('string'):
+  ids[s.attributes['id'].value]=getText(s.childNodes)
 
-doms=[]
-for i in range(len(myargs)):
-  #print "Parsing: " + myargs[i]
-  doms.append(minidom.parse(myargs[i]))
-
-#get all ids from all files
-ids=[]
-#store all ids in one dictionary and ids per file in separate dictionaries
-for i in range(len(myargs)):
-  ids.append(dict());
-  for s in doms[i].getElementsByTagName('string'):
-    allids[s.attributes['id'].value]=''
-    ids[i][s.attributes['id'].value]=getText(s.childNodes)
-
+#the lame way to generate xml
 print """<xliff>
-  <file>
-    <body>"""
-#loop all files, see if all ids are found
-for i in range(len(myargs)):
-#  print myargs[i]
-  for id in sorted(allids.keys()):
-    try:
-      translation=ids[i][id].encode("utf-8").replace("&","&amp;").replace('"','&quot;')
-    except KeyError:
-      translation="[ XXXXX MISSING ]"
-    print """
-      <trans-unit id="%s">
-        <context-group><context context-type="x-id">%s</context></context-group>
-        <source>%s</source>
-        <target>%s</target> 
-      </trans-unit>"""%(id.encode("utf-8"), id.encode("utf-8") ,baseids[id].encode("utf-8").replace("&","&amp;").replace('"','&quot;')
-                        ,translation)
+ <file>
+  <body>"""
+for id in sorted(baseids.keys(),key=int):
+  try:
+    translation=ids[id].encode("utf-8").replace("&","&amp;").replace('"','&quot;')
+  except KeyError:
+    translation=""
+  print """
+   <trans-unit id="%s">
+    <context-group><context context-type="id">%s</context></context-group>
+    <source>%s</source>
+    <target>%s</target> 
+   </trans-unit>"""%(id.encode("utf-8"), id.encode("utf-8"), baseids[id].encode("utf-8").replace("&","&amp;").replace('"','&quot;'), translation)
 
 print """
-    </body>
-  </file>
+  </body>
+ </file>
 </xliff>
 """
