@@ -55,8 +55,8 @@ for i in range(len(myargs)):
     allids[s.attributes['id'].value]=''
     ids[i][s.attributes['id'].value]=getText(s.childNodes)
 
-print """<?xml version="1.0" ?><xliff version="1.1">
-  <file datatype="plaintext" original="strings.xml" source-language="en-US">
+print """<xliff>
+  <file>
     <body>"""
 #loop all files, see if all ids are found
 for i in range(len(myargs)):
@@ -68,11 +68,11 @@ for i in range(len(myargs)):
       translation="[ XXXXX MISSING ]"
     print """
       <trans-unit id="%s">
+        <context-group><context context-type="x-id">%s</context></context-group>
         <source>%s</source>
-        <target>%s</target>
-        <note from="developer">A note for %s</note>
-      </trans-unit>"""%(id.encode("utf-8"),baseids[id].encode("utf-8").replace("&","&amp;").replace('"','&quot;')
-                        ,translation, id.encode("utf-8") )
+        <target>%s</target> 
+      </trans-unit>"""%(id.encode("utf-8"), id.encode("utf-8") ,baseids[id].encode("utf-8").replace("&","&amp;").replace('"','&quot;')
+                        ,translation)
 
 print """
     </body>
