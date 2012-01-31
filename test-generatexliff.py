@@ -51,7 +51,7 @@ for id in sorted(baseids.keys(),key=int):
     translation=""
   print """
    <trans-unit id="%s">
-    <context-group><context context-type="id">%s</context></context-group>
+    <context-group><context context-type="id">%s</context><context context-type="context">Sample Context</context></context-group>
     <source>%s</source>
     <target>%s</target> 
    </trans-unit>"""%(id.encode("utf-8"), id.encode("utf-8"), baseids[id].encode("utf-8").replace("&","&amp;").replace('"','&quot;'), translation)
