@@ -1,4 +1,4 @@
-This is a simple tool to check if XBMC addon strings.xml files of different
+translationtool.py is a simple tool to check if XBMC addon strings.xml files of different
 languages are in sync.
 
 It parses all the files given as arguments, loops through the files and stores
@@ -28,3 +28,8 @@ Backwardslanguage/strings.xml
   <string id="2">Bar</string>
   not in base:3
 
+---
+
+test-generatexliff.py and bootstrap.sh are for setting up xbmc to use transifex
+
+see xbmc forum thread at http://forum.xbmc.org/showthread.php?t=118978
