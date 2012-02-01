@@ -49,7 +49,8 @@ for id in sorted(baseids.keys(),key=int):
     translation=ids[id].encode("utf-8").replace("&","&amp;").replace('"','&quot;')
   except KeyError:
     translation=""
-  print """
+  if baseids[id]!="":
+    print """
    <trans-unit id="%s">
     <context-group><context context-type="id">%s</context><context context-type="context">Sample Context</context></context-group>
     <source>%s</source>
