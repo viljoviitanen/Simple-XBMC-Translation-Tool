@@ -39,6 +39,7 @@ shortcode() {
 }
 
 
+#fetch source xml files from git
 for lang in $LANGUAGES
 do
   echo $lang
@@ -46,6 +47,7 @@ do
   [ -f $DIR/core.$lang.xml ] || wget https://raw.github.com/xbmc/xbmc/master/language/$lang/strings.xml -O $DIR/core.$lang.xml
 done
 
+#generate xliff files
 for lang in $LANGUAGES
 do
   echo $lang
@@ -53,21 +55,30 @@ do
   [ -f $DIR/core.$lang.xlf ] || ./test-generatexliff.py $DIR/core.English.xml $DIR/core.$lang.xml > $DIR/core.$lang.xlf
 done
 
+[ "x$PASS" = "x" ] && echo "username and password missing" && exit 1
+
+#transifex project slug
+PROJECT=mytest55
+#transifex resource slugs
+CORE=core2
+CONFLUENCE=confluence2
+
 #create resources. This is done only once. So uncomment the curl lines below for first run.
 #after setup, updating the source language file is different.
 #see http://help.transifex.net/features/api/index.html#source-language-methods
 
-#curl -F file=@$DIR/confluence.English.xlf -F name=skin.confluence -F slug=confluence1 -F i18n_type=XLIFF -i -L --user $USER:$PASS -X POST https://www.transifex.net/api/2/project/mytest55/resources/
-#curl -F file=@$DIR/core.English.xlf -F name=core -F slug=core1 -F i18n_type=XLIFF -i -L --user $USER:$PASS -X POST https://www.transifex.net/api/2/project/mytest55/resources/
+#curl -F file=@$DIR/confluence.English.xlf -F name=skin.confluence -F slug=$CONFLUENCE -F i18n_type=XLIFF -i -L --user $USER:$PASS -X POST https://www.transifex.net/api/2/project/$PROJECT/resources/
+#curl -F file=@$DIR/core.English.xlf -F name=core -F slug=$CORE -F i18n_type=XLIFF -i -L --user $USER:$PASS -X POST https://www.transifex.net/api/2/project/$PROJECT/resources/
 
+#upload/update translations for resources
 for lang in $LANGUAGES
 do
   [ "$lang" = "English" ] && continue
   echo $lang
   shortcode $lang
   echo $SHORT
-  curl -F file=@$DIR/core.$lang.xlf -i -L --user $USER:$PASS -X PUT https://www.transifex.net/api/2/project/mytest55/resource/core1/translation/$SHORT/
-  curl -F file=@$DIR/confluence.$lang.xlf -i -L --user $USER:$PASS -X PUT https://www.transifex.net/api/2/project/mytest55/resource/confluence1/translation/$SHORT/
+  curl -F file=@$DIR/core.$lang.xlf -i -L --user $USER:$PASS -X PUT https://www.transifex.net/api/2/project/$PROJECT/resource/$CORE/translation/$SHORT/
+  curl -F file=@$DIR/confluence.$lang.xlf -i -L --user $USER:$PASS -X PUT https://www.transifex.net/api/2/project/$PROJECT/resource/$CONFLUENCE/translation/$SHORT/
 done
 
 
