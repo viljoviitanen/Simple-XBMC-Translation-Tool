@@ -33,7 +33,11 @@ def getText(nodelist):
 #first, parse the base file. store ids and text values in a dictionary for fast access later
 ids=dict()
 for t in minidom.parse(sys.argv[1]).getElementsByTagName('trans-unit'):
-  ids[t.attributes['id'].value]=getText(t.getElementsByTagName('target')[0].childNodes)
+  try:
+    ids[t.attributes['id'].value]=getText(t.getElementsByTagName('target')[0].childNodes)
+  except IndexError:
+    #if no target elements where found, just skip
+    pass
 
 #the lame way to generate xml
 print """<?xml version="1.0" encoding="utf-8" standalone="yes"?>
