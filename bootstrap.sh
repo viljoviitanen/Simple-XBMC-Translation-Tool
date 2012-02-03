@@ -17,6 +17,11 @@
 
 #bootstraps languages into transifex from xbmc github
 #usage: first parameter: transifex username second parameter: password
+#third parameter:
+# if create = create resources with source files
+# if update: update source
+# if something else (whatever): update only translations
+# if missing: error
 #not very pretty code, but I don't care
 
 DIR=/tmp/langs
@@ -24,6 +29,7 @@ mkdir -p $DIR
 
 USER=$1
 PASS=$2
+THIRD=$3
 
 LANGUAGES="Finnish Hungarian Swedish Afrikaans"
 
@@ -59,20 +65,30 @@ do
   [ -f $DIR/core.$lang.xlf ] || ./test-generatexliff.py $DIR/core.English.xml $DIR/core.$lang.xml > $DIR/core.$lang.xlf
 done
 
-[ "x$PASS" = "x" ] && echo "username and password missing" && exit 1
-
 #transifex project slug
 PROJECT=mytest55
 #transifex resource slugs
 CORE=core2
 CONFLUENCE=confluence2
 
-#create resources. This is done only once. So uncomment the curl lines below for first run.
-#after setup, updating the source language file is different.
-#see http://help.transifex.net/features/api/index.html#source-language-methods
+[ "x$PASS" = "x" ] && echo "username and password missing" && exit 1
 
-#curl -F file=@$DIR/confluence.English.xlf -F name=skin.confluence -F slug=$CONFLUENCE -F i18n_type=XLIFF -i -L --user $USER:$PASS -X POST https://www.transifex.net/api/2/project/$PROJECT/resources/
-#curl -F file=@$DIR/core.English.xlf -F name=core -F slug=$CORE -F i18n_type=XLIFF -i -L --user $USER:$PASS -X POST https://www.transifex.net/api/2/project/$PROJECT/resources/
+if [ "x$THIRD" = "x" ]; then
+  echo "third parameter needs to be create , update (to update source) or something else (to update only translations)"
+  exit 1
+elif [ "$THIRD" = "firstrun" ]; then
+
+  #create resources
+  curl -F file=@$DIR/confluence.English.xlf -F name=skin.confluence -F slug=$CONFLUENCE -F i18n_type=XLIFF -i -L --user $USER:$PASS -X POST https://www.transifex.net/api/2/project/$PROJECT/resources/
+  curl -F file=@$DIR/core.English.xlf -F name=core -F slug=$CORE -F i18n_type=XLIFF -i -L --user $USER:$PASS -X POST https://www.transifex.net/api/2/project/$PROJECT/resources/
+
+elif [ "$THIRD" = "update" ]; then
+
+  #update source
+  curl -F file=@$DIR/confluence.English.xlf -F name=skin.confluence -F slug=$CONFLUENCE -F i18n_type=XLIFF -i -L --user $USER:$PASS -X PUT https://www.transifex.net/api/2/project/$PROJECT/resource/$CONFLUENCE/content/
+  curl -F file=@$DIR/core.English.xlf -F name=core -F slug=$CORE -F i18n_type=XLIFF -i -L --user $USER:$PASS -X PUT https://www.transifex.net/api/2/project/$PROJECT/resource/$CORE/content/
+
+fi
 
 #upload/update translations for resources
 for lang in $LANGUAGES
