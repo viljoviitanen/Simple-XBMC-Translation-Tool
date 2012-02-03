@@ -40,6 +40,7 @@ print """<xliff>
  <file>
   <body>"""
 for id in sorted(ids.keys(),key=int):
+  if ids[id]!="":
     print """
    <trans-unit id="%s">
     <context-group><context context-type="id">%s</context><context context-type="context">Sample Context</context></context-group>
