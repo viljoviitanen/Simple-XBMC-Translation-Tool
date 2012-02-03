@@ -25,7 +25,7 @@ mkdir -p $DIR
 USER=$1
 PASS=$2
 
-LANGUAGES="English Finnish Hungarian Swedish Afrikaans"
+LANGUAGES="Finnish Hungarian Swedish Afrikaans"
 
 shortcode() {
   case $1 in
@@ -40,12 +40,16 @@ shortcode() {
 
 
 #fetch source xml files from git
-for lang in $LANGUAGES
+for lang in English $LANGUAGES
 do
   echo $lang
   [ -f $DIR/confluence.$lang.xml ] || wget https://raw.github.com/xbmc/xbmc/master/addons/skin.confluence/language/$lang/strings.xml -O $DIR/confluence.$lang.xml
   [ -f $DIR/core.$lang.xml ] || wget https://raw.github.com/xbmc/xbmc/master/language/$lang/strings.xml -O $DIR/core.$lang.xml
 done
+
+#generate source xliff files
+[ -f $DIR/confluence.English.xlf ] || ./test-generatesourcexliff.py $DIR/confluence.English.xml > $DIR/confluence.English.xlf
+[ -f $DIR/core.English.xlf ] || ./test-generatesourcexliff.py $DIR/core.English.xml > $DIR/core.English.xlf
 
 #generate xliff files
 for lang in $LANGUAGES
@@ -73,7 +77,6 @@ CONFLUENCE=confluence2
 #upload/update translations for resources
 for lang in $LANGUAGES
 do
-  [ "$lang" = "English" ] && continue
   echo $lang
   shortcode $lang
   echo $SHORT
