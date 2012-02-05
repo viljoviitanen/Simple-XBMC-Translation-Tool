@@ -15,11 +15,12 @@
 #along with this program; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
+import copy
+import sys
 from xml.dom import minidom
 
-import sys,copy
 
-#from python reference manual
+# From python reference manual
 def getText(nodelist):
     rc = ""
     for node in nodelist:
@@ -27,42 +28,48 @@ def getText(nodelist):
             rc = rc + node.data
     return rc
 
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
 
-#first, parse the base file. store ids and text values in a dictionary for fast access later
-print "Using base: "+sys.argv[1]
-allids=dict()
-baseids=dict()
-for s in minidom.parse(sys.argv[1]).getElementsByTagName('string'):
-  baseids[s.attributes['id'].value]=getText(s.childNodes)
-  allids[s.attributes['id'].value]=''
-  #print "base: %s %s"%(s.attributes['id'].value.encode("utf-8"),getText(s.childNodes).encode("utf-8"))
+    file1 = argv[1]
 
-#get only the the command line agruments 2-n
-myargs=copy.deepcopy(sys.argv)
-myargs[0:2]=[]
+    # First, parse the base file. store ids and text values in a dictionary for
+    # fast access later
+    print "Using base: " + file1
+    allids = dict()
+    baseids = dict()
+    for s in minidom.parse(file1).getElementsByTagName('string'):
+        baseids[s.attributes['id'].value] = getText(s.childNodes)
+        allids[s.attributes['id'].value] = ''
+        #print "base: %s %s"%(s.attributes['id'].value.encode("utf-8"),getText(s.childNodes).encode("utf-8"))
 
-doms=[]
-for i in range(len(myargs)):
-  #print "Parsing: " + myargs[i]
-  doms.append(minidom.parse(myargs[i]))
+    # Get only the the command line arguments 2-n
+    myargs = copy.deepcopy(argv[2:])
 
-#get all ids from all files
-ids=[]
-#store all ids in one dictionary and ids per file in separate dictionaries
-for i in range(len(myargs)):
-  ids.append(dict());
-  for s in doms[i].getElementsByTagName('string'):
-    allids[s.attributes['id'].value]=''
-    ids[i][s.attributes['id'].value]=''
+    doms = []
+    for arg in myargs:
+        #print "Parsing: " + arg
+        doms.append(minidom.parse(arg))
 
-#loop all files, see if all ids are found
-for i in range(len(myargs)):
-  print myargs[i]
-  for id in sorted(allids.keys()):
-    if id not in ids[i].keys():
-      if id in baseids.keys():
-        print """  <string id="%s">%s</string>"""%(id.encode("utf-8"),baseids[id].encode("utf-8"))
-    elif (id in ids[i].keys()) and (id not in baseids.keys()):
-        print """  not in base:%s"""%(id.encode("utf-8"))
+    # Get all ids from all files
+    ids = []
+    # Store all ids in one dictionary and ids per file in separate dictionaries
+    for i in range(len(myargs)):
+        ids.append(dict())
+        for s in doms[i].getElementsByTagName('string'):
+            allids[s.attributes['id'].value] = ''
+            ids[i][s.attributes['id'].value] = ''
 
+    # Loop all files, see if all ids are found
+    for i, arg in enumerate(myargs):
+        print arg
+        for id in sorted(allids.keys()):
+            if id not in ids[i].keys():
+                if id in baseids.keys():
+                    print """  <string id="%s">%s</string>""" % (id.encode("utf-8"), baseids[id].encode("utf-8"))
+            elif id in ids[i].keys() and id not in baseids.keys():
+                print """  not in base:%s"""%(id.encode("utf-8"))
 
+if __name__ == '__main__':
+    sys.exit(main())

@@ -15,14 +15,16 @@
 #along with this program; if not, write to the Free Software
 #Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#generates an xliff file for transifex import
-#usage: first parameter: English/strings.xml second parameter: Otherlanguage/strings.xml
+# test-generatexliff.py
+#
+# Generates an xliff file for transifex import
+# Usage: first parameter: English/strings.xml second parameter: Otherlanguage/strings.xml
 
+import sys
 from xml.dom import minidom
 
-import sys,copy
 
-#from python reference manual
+# From python reference manual
 def getText(nodelist):
     rc = ""
     for node in nodelist:
@@ -30,35 +32,52 @@ def getText(nodelist):
             rc = rc + node.data
     return rc
 
-#first, parse the base file. store ids and text values in a dictionary for fast access later
-baseids=dict()
-for s in minidom.parse(sys.argv[1]).getElementsByTagName('string'):
-  baseids[s.attributes['id'].value]=getText(s.childNodes)
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
 
-#then the other file
-ids=dict();
-for s in minidom.parse(sys.argv[2]).getElementsByTagName('string'):
-  ids[s.attributes['id'].value]=getText(s.childNodes)
+    file1 = argv[1]
+    file2 = argv[2]
 
-#the lame way to generate xml
-print """<xliff>
+    # First, parse the base file. store ids and text values in a dictionary for
+    # fast access later
+    baseids = dict()
+    for s in minidom.parse(file1).getElementsByTagName('string'):
+        baseids[s.attributes['id'].value] = getText(s.childNodes)
+
+    # Then the other file
+    ids = dict()
+    for s in minidom.parse(file2).getElementsByTagName('string'):
+        ids[s.attributes['id'].value] = getText(s.childNodes)
+
+    # The lame way to generate xml
+    print """<xliff>
  <file>
   <body>"""
-for id in sorted(baseids.keys(),key=int):
-  try:
-    translation=ids[id].encode("utf-8").replace("&","&amp;").replace('"','&quot;')
-  except KeyError:
-    translation=""
-  if baseids[id]!="":
-    print """
+    for id in sorted(baseids.keys(),key=int):
+        try:
+            translation = ids[id].encode("utf-8").replace("&","&amp;").replace('"','&quot;')
+        except KeyError:
+            translation = ""
+
+        if baseids[id]:
+            print """
    <trans-unit id="%s">
     <context-group><context context-type="id">%s</context><context context-type="context">Sample Context</context></context-group>
     <source>%s</source>
-    <target>%s</target> 
-   </trans-unit>"""%(id.encode("utf-8"), id.encode("utf-8"), baseids[id].encode("utf-8").replace("&","&amp;").replace('"','&quot;'), translation)
+    <target>%s</target>
+   </trans-unit>""" % (
+        id.encode("utf-8"),
+        id.encode("utf-8"),
+        baseids[id].encode("utf-8").replace("&","&amp;").replace('"','&quot;'),
+        translation,
+    )
 
-print """
+    print """
   </body>
  </file>
 </xliff>
 """
+
+if __name__ == '__main__':
+    sys.exit(main())
