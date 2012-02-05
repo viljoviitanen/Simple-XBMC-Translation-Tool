@@ -1,5 +1,5 @@
 #!/usr/bin/python
-#Copyright (C) 2012  Viljo Viitanen <viljo.viitanen@iki.fi>
+#Copyright (C) 2012  Viljo Viitanen <viljo.viitanen@iki.fi> and contributors.
 #
 #This program is free software; you can redistribute it and/or
 #modify it under the terms of the GNU General Public License
