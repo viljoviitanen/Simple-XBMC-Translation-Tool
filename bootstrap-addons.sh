@@ -81,7 +81,7 @@ shortcode() {
 }
 
 #generate source xliff files
-for addon in `ls $A|grep confluence`
+for addon in `ls $A`
 do
 
   echo trying $addon
@@ -94,15 +94,14 @@ do
   else
     continue
   fi
-  [ -f $DIR/$addon.English.xlf ] || ./test-generatesourcexliff.py $B/English/strings.xml  > $DIR/$addon.English.xlf
+  [ -f $DIR/$addon.English.xlf ] || ./test-generatesourcexliff.py $B/English/strings.xml  > $DIR/$addon.English.xlf || { rm $DIR/$addon.English.xlf; exit 1; }
   ls $B | while read lang
   do
     [ "$lang" = "English" ] && continue
     echo $lang
     shortcode "$lang" || exit 1 
-    echo $SHORT
-    [ -f $DIR/$addon.$SHORT.xlf ] || ./test-generatexliff.py $B/English/strings.xml  "$B/$lang/strings.xml" > $DIR/$addon.$SHORT.xlf 
-  done
+    [ -f $DIR/$addon.$SHORT.xlf ] || ./test-generatexliff.py $B/English/strings.xml  "$B/$lang/strings.xml"  > $DIR/$addon.$SHORT.xlf || { rm $DIR/$addon.$SHORT.xlf; exit 1; }
+  done || exit 1
 done || exit 1
 
 #transifex project slug
@@ -152,7 +151,6 @@ do
     [ "$lang" = "English" ] && continue
     echo $lang
     shortcode "$lang"
-    echo $SHORT
     if [ ! -s $DIR/$addon.$SHORT.xlf ]; then
       echo ==== $addon.$SHORT.xlf empty
       exit 1
